@@ -1,0 +1,78 @@
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    include-message: never
+spring:
+  application:
+    name: topic-atlas
+  datasource:
+    url: jdbc:h2:file:./data/topic-atlas;MODE=MySQL;DB_CLOSE_ON_EXIT=FALSE;WRITE_DELAY=0
+    username: sa
+    password: ${LOCAL_DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: update
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+      fail-on-numbers-for-enums: true
+  ai:
+    model:
+      chat: openai
+      embedding: none
+    openai:
+      api-key: ${DEEPSEEK_API_KEY:not-configured}
+      base-url: ${DEEPSEEK_BASE_URL:https://api.deepseek.com}
+      chat:
+        completions-path: /chat/completions
+        options:
+          model: ${DEEPSEEK_MODEL:deepseek-flash}
+          temperature: ${DEEPSEEK_TEMPERATURE:0.3}
+          max-tokens: ${DEEPSEEK_MAX_TOKENS:2400}
+    retry:
+      max-attempts: ${AI_RETRY_MAX_ATTEMPTS:2}
+      backoff:
+        initial-interval: ${AI_RETRY_INITIAL_INTERVAL:1s}
+        multiplier: ${AI_RETRY_MULTIPLIER:2}
+        max-interval: ${AI_RETRY_MAX_INTERVAL:5s}
+      on-client-errors: false
+app:
+  admin:
+    display-name: ${ADMIN_DISPLAY_NAME:管理员}
+    recent-usage-limit: ${ADMIN_RECENT_USAGE_LIMIT:100}
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+  ai:
+    daily-limit: ${AI_DAILY_LIMIT:100}
+    quota-zone: ${AI_QUOTA_ZONE:Asia/Shanghai}
+    connect-timeout: ${AI_CONNECT_TIMEOUT:15s}
+    read-timeout: ${AI_READ_TIMEOUT:120s}
+    extract-candidates: ${AI_EXTRACT_CANDIDATES:3}
+    prompts:
+      extract: ${AI_EXTRACT_PROMPT:classpath:prompts/extract.txt}
+      expand: ${AI_EXPAND_PROMPT:classpath:prompts/expand.txt}
+  auth:
+    session-ttl: ${AUTH_SESSION_TTL:7d}
+    login-window: ${AUTH_LOGIN_WINDOW:15m}
+    login-max-attempts: ${AUTH_LOGIN_MAX_ATTEMPTS:30}
+  tree:
+    max-nodes: ${TREE_MAX_NODES:3000}
+    max-depth: ${TREE_MAX_DEPTH:80}
+  topic:
+    seed-enabled: ${TOPIC_SEED_ENABLED:true}
+    seed-location: ${TOPIC_SEED_LOCATION:classpath:seed/topics.json}
+    default-color: "${TOPIC_DEFAULT_COLOR:#548b9d}"
+logging:
+  file:
+    name: ${LOG_FILE:./logs/topic-atlas.log}
+  logback:
+    rollingpolicy:
+      max-file-size: ${LOG_MAX_FILE_SIZE:10MB}
+      max-history: ${LOG_MAX_HISTORY:30}
+      total-size-cap: ${LOG_TOTAL_SIZE_CAP:200MB}
+  pattern:
+    level: "%5p [requestId=%X{requestId:-none}]"
+  level:
+    com.aichat: ${APP_LOG_LEVEL:INFO}
+    org.springframework.ai: WARN

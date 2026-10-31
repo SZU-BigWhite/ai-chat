@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:topic-atlas:export:1.0",
+  "title": "Topic Atlas knowledge tree export",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "topic", "description", "root"],
+  "properties": {
+    "schemaVersion": { "const": "1.0" },
+    "topic": { "type": "string" },
+    "description": { "type": "string" },
+    "root": { "$ref": "#/$defs/node" }
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name", "description", "children"],
+      "properties": {
+        "id": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string", "maxLength": 2000 },
+        "children": { "type": "array", "items": { "$ref": "#/$defs/node" } }
+      }
+    }
+  }
+}
